@@ -66,6 +66,8 @@ on:
     types: [opened, synchronize, ready_for_review, reopened]
   issue_comment:
     types: [created]
+  pull_request_review_comment:
+    types: [created]
 
 permissions:
   contents: read
@@ -91,7 +93,7 @@ That's the entire integration. Updates to the prompts in this central repo propa
 Both reviewers re-trigger when their handle is mentioned in a PR comment:
 
 - `@claude` — re-runs Claude. Also triggers on `pull_request_review_comment` events so you can prompt it inline from a review thread.
-- `@gemini` — re-runs Gemini.
+- `@gemini` — re-runs Gemini. Also triggers on `pull_request_review_comment` so the same inline-thread prompting works.
 
 The `if:` guard inside each reusable workflow handles the routing — there's no extra wiring on the consumer side.
 
