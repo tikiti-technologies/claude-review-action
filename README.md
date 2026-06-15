@@ -47,10 +47,11 @@ jobs:
     uses: tikiti-technologies/claude-review-action/.github/workflows/claude-review.yml@v1
     with:
       stack: nestjs-fastify-drizzle
-      runner: '"ubuntu-latest"'
       slack_notify: true
       # Optional — repo-specific conventions appended to the public stack prompt
       extra_prompt_path: .github/review-extras.md
+      # runner: '["self-hosted","aws","spot"]'   # only set this to override the
+      #                                          # default ubuntu-latest
     secrets:
       claude_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       slack_webhook_url:  ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -78,9 +79,10 @@ jobs:
     uses: tikiti-technologies/claude-review-action/.github/workflows/gemini-review.yml@v1
     with:
       stack: nestjs-fastify-drizzle
-      runner: '"ubuntu-latest"'
       slack_notify: true
       extra_prompt_path: .github/review-extras.md
+      # runner: '["self-hosted","aws","spot"]'   # only set this to override the
+      #                                          # default ubuntu-latest
     secrets:
       gemini_api_key:    ${{ secrets.GEMINI_API_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
