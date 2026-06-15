@@ -47,10 +47,11 @@ jobs:
     uses: tikiti-technologies/claude-review-action/.github/workflows/claude-review.yml@v1
     with:
       stack: nestjs-fastify-drizzle
-      runner: '"ubuntu-latest"'
       slack_notify: true
       # Optional — repo-specific conventions appended to the public stack prompt
       extra_prompt_path: .github/review-extras.md
+      # runner: '["self-hosted","aws","spot"]'   # only set this to override the
+      #                                          # default ubuntu-latest
     secrets:
       claude_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
       slack_webhook_url:  ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -66,6 +67,8 @@ on:
     types: [opened, synchronize, ready_for_review, reopened]
   issue_comment:
     types: [created]
+  pull_request_review_comment:
+    types: [created]
 
 permissions:
   contents: read
@@ -76,9 +79,10 @@ jobs:
     uses: tikiti-technologies/claude-review-action/.github/workflows/gemini-review.yml@v1
     with:
       stack: nestjs-fastify-drizzle
-      runner: '"ubuntu-latest"'
       slack_notify: true
       extra_prompt_path: .github/review-extras.md
+      # runner: '["self-hosted","aws","spot"]'   # only set this to override the
+      #                                          # default ubuntu-latest
     secrets:
       gemini_api_key:    ${{ secrets.GEMINI_API_KEY }}
       slack_webhook_url: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -91,7 +95,7 @@ That's the entire integration. Updates to the prompts in this central repo propa
 Both reviewers re-trigger when their handle is mentioned in a PR comment:
 
 - `@claude` — re-runs Claude. Also triggers on `pull_request_review_comment` events so you can prompt it inline from a review thread.
-- `@gemini` — re-runs Gemini.
+- `@gemini` — re-runs Gemini. Also triggers on `pull_request_review_comment` so the same inline-thread prompting works.
 
 The `if:` guard inside each reusable workflow handles the routing — there's no extra wiring on the consumer side.
 
@@ -175,8 +179,17 @@ gh secret set SLACK_WEBHOOK_URL       --repo <owner>/<repo>
 1. Create `prompts/<stack-name>.md` with stack-specific review conventions. Keep it project-agnostic — repo-specific things go in `extra_prompt` / `extra_prompt_path` on each consumer.
 2. Reference it as `stack: <stack-name>` in consuming repo wrappers.
 3. Optionally cut a new tag (`v1.x.0`) so consumers can pin to it.
+4. **Mirror the change to the sibling org's fork** (see "Sibling fork" below).
 
 `base.md` covers universal rules and is always loaded first.
+
+### Sibling fork — keep in lockstep
+
+This repo has a sibling at [`Agentari-Technologies/claude-review-action`](https://github.com/Agentari-Technologies/claude-review-action) (and vice versa). Both are intentionally kept private; cross-org reusable-workflow access isn't wired up, so each org consumes from its own copy.
+
+Any change to `prompts/`, `.github/workflows/`, `actions/`, or this README must land in both repos with matching content. The only intentional difference is the `repository:` self-reference inside each workflow (`tikiti-technologies/claude-review-action` vs `Agentari-Technologies/claude-review-action`). When you cut a tag, cut the same tag in the sibling and fast-forward `v1` on both.
+
+**Before adding a feature:** sanity-check that the sibling is at parity. From a local clone of the sibling, `git fetch && git log --oneline main..origin/main` should be empty in both directions before you start. Any unmerged commit on either side is drift; reconcile it before adding new work.
 
 ## Versioning
 
