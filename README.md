@@ -8,7 +8,7 @@ Reusable GitHub Actions workflows for running AI code review on every pull reque
 Both reviewers load:
 
 1. **`prompts/base.md`** — universal rules (security, correctness, code quality, performance, maintainability).
-2. **`prompts/<stack>.md`** — stack-specific conventions (e.g. `nestjs-fastify-drizzle.md`).
+2. **`prompts/<stack>.md`** — stack-specific conventions (e.g. `nestjs-fastify-drizzle.md`, `nextjs-turborepo-shadcn.md`).
 3. The consuming repo's **`CLAUDE.md`** for project-specific guidance.
 4. **Optional repo-specific addendum** via `extra_prompt` (inline) or `extra_prompt_path` (file path in the consumer repo) — see below.
 
@@ -210,7 +210,8 @@ Without these, the effective `GITHUB_TOKEN` in the reusable workflow falls back 
 │       └── action.yml       # composite action used by both reviewers
 ├── prompts/
 │   ├── base.md              # universal review rules (always loaded)
-│   └── nestjs-fastify-drizzle.md
+│   ├── nestjs-fastify-drizzle.md
+│   └── nextjs-turborepo-shadcn.md  # Next.js (App Router) + Turborepo + shadcn/ui + Tailwind v4
 ├── LICENSE
 └── README.md
 ```
