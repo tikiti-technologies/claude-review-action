@@ -8,7 +8,7 @@ Reusable GitHub Actions workflows for running AI code review on every pull reque
 Both reviewers load:
 
 1. **`prompts/base.md`** — universal rules (security, correctness, code quality, performance, maintainability).
-2. **`prompts/<stack>.md`** — stack-specific conventions (e.g. `nestjs-fastify-drizzle.md`).
+2. **`prompts/<stack>.md`** — stack-specific conventions (e.g. `nestjs-fastify-drizzle.md`, `nextjs-turborepo-shadcn.md`).
 3. The consuming repo's **`CLAUDE.md`** for project-specific guidance.
 4. **Optional repo-specific addendum** via `extra_prompt` (inline) or `extra_prompt_path` (file path in the consumer repo) — see below.
 
@@ -115,6 +115,21 @@ Example `.github/review-extras.md` in a consumer repo:
 - Throttler is global at 100 req/60s; flag endpoints needing a tighter cap
 ```
 
+### What to put in `extra_prompt_path`
+
+The stack prompts intentionally stay generic. Use the consumer's extras file for anything the generic prompt cannot know about your repo. Common contents:
+
+- Whether `no-explicit-any` is genuinely enforced or relaxed (some monorepos disable it deliberately).
+- Whether stricter tsconfig flags (`noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`, etc.) are enabled in this repo — the stack prompt treats these as advisory.
+- The exact set of feature directories and which ones are fully built vs scaffolded.
+- App-specific auth flows (e.g. consumer dialog vs producer email-OTP vs admin email-password).
+- Cookie name prefixes, BFF route shape (`app/api/[...path]/route.ts` vs split per-resource), token-management module name.
+- Custom guards / decorators / interceptors / hooks specific to the project.
+- The chosen logger (pino / winston / custom), animation library (framer-motion / motion), sanitiser (DOMPurify / sanitize-html).
+- Allowed deviations from the stack rules and *why*.
+- Files / directories whose conventions diverge from the rest of the app.
+- Pre-commit / pre-push hook behaviour, branch-naming regex, commit-message format.
+
 ## Inputs
 
 ### Claude (`claude-review.yml`)
@@ -210,7 +225,8 @@ Without these, the effective `GITHUB_TOKEN` in the reusable workflow falls back 
 │       └── action.yml       # composite action used by both reviewers
 ├── prompts/
 │   ├── base.md              # universal review rules (always loaded)
-│   └── nestjs-fastify-drizzle.md
+│   ├── nestjs-fastify-drizzle.md
+│   └── nextjs-turborepo-shadcn.md  # Next.js (App Router) + Turborepo + shadcn/ui + Tailwind v4
 ├── LICENSE
 └── README.md
 ```
