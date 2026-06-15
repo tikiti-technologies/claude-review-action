@@ -200,30 +200,13 @@ jobs:
               fi
               printf '%s\n' "$EXTRA_PROMPT"
             fi
-            cat <<'PROMPT_TAIL'
-
-## Review Instructions
-
-Analyze the code and respond with a JSON object:
-{
-  "summary": "1-3 sentence overview",
-  "issues": [
-    {
-      "file": "path/to/file",
-      "line": 42,
-      "severity": "critical|high|medium|low",
-      "category": "security|bug|performance|logic|style|maintainability|architecture",
-      "description": "What's wrong and why",
-      "suggestion": "How to fix it"
-    }
-  ],
-  "positives": ["Things done well"],
-  "overall_assessment": "approve|comment|request_changes"
-}
-
-Focus on actionable findings. Skip trivial style issues. Be concise.
-Respond ONLY with the JSON object. No markdown fences.
-PROMPT_TAIL
+            # Output-format instructions live in prompts/_gemini-tail.md.
+            # Inlining them here as a bash heredoc broke YAML parsing because
+            # the heredoc body sat at column 1, outside the `run: |` literal
+            # scalar — Actions failed the workflow with "error parsing called
+            # workflow" the moment a consumer invoked the reusable.
+            echo ""
+            cat "$ROOT/prompts/_gemini-tail.md"
           } > /tmp/review-prompt.txt
 
           echo "$CODE" > /tmp/review-code.txt
