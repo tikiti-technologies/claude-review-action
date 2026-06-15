@@ -164,8 +164,17 @@ gh secret set SLACK_WEBHOOK_URL       --repo <owner>/<repo>
 1. Create `prompts/<stack-name>.md` with stack-specific review conventions. Keep it project-agnostic — repo-specific things go in `extra_prompt` / `extra_prompt_path` on each consumer.
 2. Reference it as `stack: <stack-name>` in consuming repo wrappers.
 3. Optionally cut a new tag (`v1.x.0`) so consumers can pin to it.
+4. **Mirror the change to the sibling org's fork** (see "Sibling fork" below).
 
 `base.md` covers universal rules and is always loaded first.
+
+### Sibling fork — keep in lockstep
+
+This repo has a sibling at [`Agentari-Technologies/claude-review-action`](https://github.com/Agentari-Technologies/claude-review-action) (and vice versa). Both are intentionally kept private; cross-org reusable-workflow access isn't wired up, so each org consumes from its own copy.
+
+Any change to `prompts/`, `.github/workflows/`, `actions/`, or this README must land in both repos with matching content. The only intentional difference is the `repository:` self-reference inside each workflow (`tikiti-technologies/claude-review-action` vs `Agentari-Technologies/claude-review-action`). When you cut a tag, cut the same tag in the sibling and fast-forward `v1` on both.
+
+**Before adding a feature:** sanity-check that the sibling is at parity. From a local clone of the sibling, `git fetch && git log --oneline main..origin/main` should be empty in both directions before you start. Any unmerged commit on either side is drift; reconcile it before adding new work.
 
 ## Versioning
 
